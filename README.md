@@ -1,4 +1,4 @@
-# STILL HIGHLE WIP
+# STILL HIGHLY WIP
 - No code optimizatio
 - Tons of bugs to be expected
 - Not really nice looking
