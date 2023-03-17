@@ -5,3 +5,6 @@
 
 ## I have only spend about a day on it so far! 
 
+### Credits
+- Logo made by link **[leifniem](https://github.com/leifniem)** 
+
