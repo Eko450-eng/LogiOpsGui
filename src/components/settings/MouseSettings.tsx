@@ -1,13 +1,12 @@
 import { BaseSyntheticEvent, useState } from "react";
 import { Clipboard } from 'tabler-icons-react'
 import { keys } from "./defaults/KeyCodes";
-import { Text, TextInput, Group, Button, NumberInput, Center, Stack, Select, Modal, List, ActionIcon } from '@mantine/core'
+import { Text, TextInput, Group, Button, NumberInput, Center, Stack, Select, Modal, List } from '@mantine/core'
 import { useDispatch, useSelector } from 'react-redux'
 import fs from 'fs'
-import { exec } from 'child_process'
 import { templateConfig } from "./defaults/config";
 import { RootState } from "@/interfaces/redux/mouseSettingsStore";
-import { changeName } from "@/interfaces/redux/mouseSettings/mouseSlice";
+import { changeDPI, changeName } from "@/interfaces/redux/mouseSettings/mouseSlice";
 import { toggleSS } from "@/interfaces/redux/mouseSettings/smartshift";
 import { TWDivert, TWInvert } from "@/interfaces/redux/mouseSettings/thumbwheel/thumbwheel";
 import { invertHiresscroll, targetHiresscroll, toggleHiresscroll } from "@/interfaces/redux/mouseSettings/hiresscroll";
@@ -31,8 +30,6 @@ export default function MouseSettings() {
   const [editing, setEditing] = useState(false)
   const [showKeys, setShowKeys] = useState(false)
   const [message, setMessage] = useState("")
-  const [dir, setDir] = useState(`${homeDir}/.config/logipsguicfg`)
-  const fileName = `${homeDir}/.config/logipsguicfg/config.cfg`
   const mouse = useSelector((state: RootState) => state.mouse)
   const smartshift = useSelector((state: RootState) => state.smartshift)
   const hiresscroll = useSelector((state: RootState) => state.hiresscroll)
@@ -50,38 +47,44 @@ export default function MouseSettings() {
   const dispatcher = useDispatch()
 
 
+  const [dir, setDir] = useState(`${homeDir}/.config/logiopsguicfg`)
+  const fileName = `${dir}/config.cfg`
+
   function createConfig() {
     const template = templateConfig(mouse, smartshift, hiresscroll, thumbwheel, thumbwheelLeft, thumbwheelRight, thumbwheelTap, gestureButtonUp, gestureButtonDown, gestureButtonLeft, gestureButtonRight, centerButton, forwardButton, backButton)
-    if (!fs.existsSync(dir))
+    if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true })
+    }
 
     if (fs.existsSync(process.env.CFGPATH ? process.env.CFGPATH : fileName)) {
-      fs.writeFile(fileName, template, (err) => { console.log(err) })
+      fs.writeFile(fileName, template, (err) => { if (err) alert(err.message) })
     } else {
-      fs.writeFile(fileName, template, (err) => {
-        if (err) {
-          alert(err.message)
-        }
-      })
+      fs.writeFile(fileName, template, (err) => { if (err) alert(err.message) })
     }
-    let cPath = exec('pwd')
-    if (cPath.stdout) {
-      cPath.stdout.on('data', (data) => {
-        setMessage(`sudo logid -c ${data.replace(/\n/gm, "")}/config.cfg`)
-      })
-    }
+    setMessage(`sudo logid -c ${dir}/config.cfg`)
   }
 
   return (
     <div>
       <>
-        <button onClick={() => setEditing(!editing)} >
-          {`Change to ${editing ? "view mode" : "editing mode"}`}
-        </button>
+        <Center>
+          <Stack>
+            <Group>
+              <Button onClick={() => setEditing(!editing)} >
+                {`Change to ${editing ? "view mode" : "editing mode"}`}
+              </Button>
 
-        <button onClick={() => setShowKeys(!showKeys)} >
-          {`${showKeys ? "Hide" : "Show"} keys`}
-        </button>
+              <Button onClick={() => setShowKeys(!showKeys)} >
+                {`${showKeys ? "Hide" : "Show"} keys`}
+              </Button>
+            </Group>
+            <TextInput
+              value={dir}
+              label="Config location:"
+              onChange={(v: BaseSyntheticEvent) => setDir(v.target.value)}
+            />
+          </Stack>
+        </Center>
 
 
         <Center>
@@ -101,13 +104,13 @@ export default function MouseSettings() {
                 label="DPI"
                 step={100}
                 value={mouse.dpi}
-                onChange={(v: number) => console.log(v)}
+                onChange={(v: number) => dispatcher(changeDPI(v))}
               />
 
               <Button
                 sx={(theme) => ({ backgroundColor: smartshift.on ? theme.colors.green : theme.colors.gray })}
                 onClick={() => dispatcher(toggleSS())}
-              >{smartshift.on ? "On" : "Off"}</Button>
+              >{smartshift.on ? "Smartshift On" : "Smartshift Off"}</Button>
 
             </Group>
 

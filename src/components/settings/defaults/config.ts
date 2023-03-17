@@ -43,7 +43,7 @@ export const templateConfig = (mouse: IMouse,
                   pixels: ${thumbwheelLeft.pixels}
                   action: {
             type: "${thumbwheelLeft.type}"
-                          keys: ["${thumbwheelLeft.keys![0]}"]
+            ${(thumbwheelLeft.keys && thumbwheelLeft.keys[0]) ? `keys: ["${thumbwheelLeft.keys[0]}"];` : ""}
           }
         }
           right: {
@@ -52,13 +52,13 @@ export const templateConfig = (mouse: IMouse,
                   pixels: ${thumbwheelRight.pixels}
                   action: {
             type: "${thumbwheelRight.type}"
-                          keys: ["${thumbwheelRight.keys![0]}"]
+            ${(thumbwheelRight.keys && thumbwheelRight.keys[0]) ? `keys: ["${thumbwheelRight.keys[0]}"];` : ""}
           }
         }
       
           tap: {
           type: "${thumbwheelTap.type}"
-              keys: ["${thumbwheelTap.keys![0]}"]
+            ${(thumbwheelTap.keys && thumbwheelTap.keys[0]) ? `keys: ["${thumbwheelTap.keys[0]}"];` : ""}
         }
 
       };
@@ -76,7 +76,7 @@ export const templateConfig = (mouse: IMouse,
                 action =
                 {
                   type: "${gestureButtonUp.type}";
-                  keys: ["${gestureButtonUp.keys![0]}"]
+            ${(gestureButtonUp.keys && gestureButtonUp.keys[0]) ? `keys: ["${gestureButtonUp.keys[0]}"];` : ""}
                 };
               },
               {
@@ -85,7 +85,7 @@ export const templateConfig = (mouse: IMouse,
                 action =
                 {
                   type: "${gestureButtonDown.type}";
-                  keys: ["${gestureButtonDown.keys![0]}"]
+            ${(gestureButtonDown.keys && gestureButtonDown.keys[0]) ? `keys: ["${gestureButtonDown.keys[0]}"];` : ""}
                 };
               },
               {
@@ -94,7 +94,7 @@ export const templateConfig = (mouse: IMouse,
                 action =
                 {
                   type: "${gestureButtonLeft.type}";
-                  keys: ["${gestureButtonLeft.keys![0]}"]
+            ${(gestureButtonLeft.keys && gestureButtonLeft.keys[0]) ? `keys: ["${gestureButtonLeft.keys[0]}"];` : ""}
                 };
               },
               {
@@ -103,7 +103,7 @@ export const templateConfig = (mouse: IMouse,
                 action =
                 {
                   type: "${gestureButtonRight.type}";
-                  keys: ["${gestureButtonRight.keys![0]}"]
+            ${(gestureButtonRight.keys && gestureButtonRight.keys[0]) ? `keys: ["${gestureButtonRight.keys[0]}"];` : ""}
                 }
               },
               {
@@ -119,6 +119,7 @@ export const templateConfig = (mouse: IMouse,
           action =
           {
             type = "${centerButton.type}";
+            ${(centerButton.keys && centerButton.keys[0]) ? `keys: ["${centerButton.keys[0]}"];` : ""}
           };
         },
         {
@@ -126,7 +127,7 @@ export const templateConfig = (mouse: IMouse,
           action =
           {
             type: "${backButton.type}";
-            keys: ["${backButton.keys![0]}"];
+            ${(backButton.keys && backButton.keys[0]) ? `keys: ["${backButton.keys[0]}"];` : ""}
           };
         },
         {
@@ -134,7 +135,7 @@ export const templateConfig = (mouse: IMouse,
           action =
           {
             type: "${forwardButton.type}";
-            keys: ["${forwardButton.keys![0]}"];
+            ${(forwardButton.keys && forwardButton.keys[0]) ? `keys: ["${forwardButton.keys[0]}"];` : ""}
           };
         }
       );

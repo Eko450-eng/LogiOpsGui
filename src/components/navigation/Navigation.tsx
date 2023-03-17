@@ -1,7 +1,9 @@
+import { Text } from '@mantine/core'
+
 export default function Navigation() {
   return (
     <div>
-      <p>Hi</p>
+      <Text>Please be sure to make a backup of your configuration!</Text>
     </div>
   )
 }
