@@ -8,7 +8,7 @@ To work you need to have **[Logiops](https://github.com/PixlOne/logiops)** from 
 # Supported devices
 |     Device     | Compatible? |              Config Name               |
 | :------------: | :---------: | :------------------------------------: |
-|  MX Master 3S   |     Yes     |      `Wireless Mouse MX Master 3`      |
+|  MX Master 3S   |     Yes     |      `Wireless Mouse MX Master 3S`      |
 |  MX Master 3   |     No     |      `Wireless Mouse MX Master 3`      |
 |  MX Master 2S  |     No     |     `Wireless Mouse MX Master 2S`      |
 |   MX Master    |     No     |       `Wireless Mouse MX Master`       |
