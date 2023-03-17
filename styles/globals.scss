@@ -1,0 +1,42 @@
+$rich-black-fogra-29: hsla(197, 100%, 5%, 1);
+$blue-sapphire: hsla(190, 100%, 23%, 1);
+$viridian-green: hsla(181, 88%, 31%, 1);
+$middle-blue-green: hsla(160, 41%, 70%, 1);
+$medium-champagne: hsla(45, 60%, 78%, 1);
+$gamboge: hsla(39, 100%, 47%, 1);
+$alloy-orange: hsla(30, 98%, 40%, 1);
+$rust: hsla(19, 97%, 37%, 1);
+$rufous: hsla(5, 81%, 38%, 1);
+$ruby-red: hsla(358, 64%, 37%, 1);
+$border-radius: 15px;
+$border-radius-icon: 100%;
+
+@mixin flex($dir: column, $jc: unset, $ac: unset) {
+  display: flex;
+  flex-direction: $dir;
+  justify-content: $jc;
+  align-items: $ac;
+}
+
+*{
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body{
+  color: white;
+  background-color: $rich-black-fogra-29;
+  main{
+    @include flex(column, center, center);
+  }
+}
+
+.section{
+    @include flex(column, center, center);
+  margin-top: 2rem;
+  background-color: rgba(0,0,0,0.5);
+  padding: 1rem;
+  border-radius: $border-radius;
+  text-align: center;
+}
