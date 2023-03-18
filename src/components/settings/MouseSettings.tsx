@@ -1,9 +1,10 @@
-import { BaseSyntheticEvent, useState } from "react";
-import { Clipboard } from 'tabler-icons-react'
-import { keys } from "./defaults/KeyCodes";
-import { Text, TextInput, Group, Button, NumberInput, Center, Stack, Select, Modal, List } from '@mantine/core'
-import { useDispatch, useSelector } from 'react-redux'
 import fs from 'fs'
+import os from 'os'
+import { BaseSyntheticEvent, useState } from "react";
+import { Clipboard, X } from 'tabler-icons-react'
+import { keys } from "./defaults/KeyCodes";
+import { Text, TextInput, Group, Button, NumberInput, Center, Stack, Modal, List, Accordion, Affix, Slider } from '@mantine/core'
+import { useDispatch, useSelector } from 'react-redux'
 import { templateConfig } from "./defaults/config";
 import { RootState } from "@/interfaces/redux/mouseSettingsStore";
 import { changeDPI, changeName } from "@/interfaces/redux/mouseSettings/mouseSlice";
@@ -20,15 +21,21 @@ import { GDownActionKey, GDownMode } from "@/interfaces/redux/mouseSettings/gest
 import { CenterBtnActionKey, CenterBtnActionType } from "@/interfaces/redux/mouseSettings/buttons/centerButton";
 import { BackBtnActionKey, BackBtnActionType } from "@/interfaces/redux/mouseSettings/buttons/backButton";
 import { ForwardBtnActionKey, ForwardBtnActionType } from "@/interfaces/redux/mouseSettings/buttons/forwardButton";
-import os from 'os'
-import { clipboard } from "electron";
-
-
+import { clipboard } from 'electron'
+import Keybind from './components/Keybind';
+import Toggleswitch from './components/Toggleswitch';
 
 export default function MouseSettings() {
   const homeDir = os.homedir()
-  const [editing, setEditing] = useState(false)
-  const [showKeys, setShowKeys] = useState(false)
+  const [sections, showSection] = useState({
+    keys: false,
+    settings: false,
+    device: false,
+    hires: false,
+    thumbwheel: false,
+    gestures: false,
+    buttons: false,
+  })
   const [message, setMessage] = useState("")
   const mouse = useSelector((state: RootState) => state.mouse)
   const smartshift = useSelector((state: RootState) => state.smartshift)
@@ -52,6 +59,7 @@ export default function MouseSettings() {
 
   function createConfig() {
     const template = templateConfig(mouse, smartshift, hiresscroll, thumbwheel, thumbwheelLeft, thumbwheelRight, thumbwheelTap, gestureButtonUp, gestureButtonDown, gestureButtonLeft, gestureButtonRight, centerButton, forwardButton, backButton)
+
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true })
     }
@@ -61,39 +69,34 @@ export default function MouseSettings() {
     } else {
       fs.writeFile(fileName, template, (err) => { if (err) alert(err.message) })
     }
+
     setMessage(`sudo logid -c ${dir}/config.cfg`)
   }
 
   return (
-    <div>
-      <>
-        <Center>
-          <Stack>
-            <Group>
-              <Button onClick={() => setEditing(!editing)} >
-                {`Change to ${editing ? "view mode" : "editing mode"}`}
-              </Button>
-
-              <Button onClick={() => setShowKeys(!showKeys)} >
-                {`${showKeys ? "Hide" : "Show"} keys`}
-              </Button>
-            </Group>
+    <>
+      <Accordion sx={{ width: "80%" }} variant="separated">
+        <Accordion.Item value="config" className="section">
+          <Accordion.Control>Config</Accordion.Control>
+          <Accordion.Panel>
             <TextInput
               value={dir}
               label="Config location:"
               onChange={(v: BaseSyntheticEvent) => setDir(v.target.value)}
             />
-          </Stack>
-        </Center>
+          </Accordion.Panel>
+        </Accordion.Item>
 
 
-        <Center>
-          <form onSubmit={(e: any) => {
-            e.preventDefault()
-            createConfig()
-          }} className="settings">
+        <form onSubmit={(e: React.FormEvent<HTMLFormElement>) => {
+          e.preventDefault()
+          createConfig()
+        }} className="settings">
 
-            <Group className="section">
+          <Accordion.Item value="device" className="section">
+            <Accordion.Control>Device Info</Accordion.Control>
+            <Accordion.Panel>
+              <Text>Device Information</Text>
               <TextInput
                 value={mouse.name}
                 label="Device Name"
@@ -106,343 +109,246 @@ export default function MouseSettings() {
                 value={mouse.dpi}
                 onChange={(v: number) => dispatcher(changeDPI(v))}
               />
+              <Slider
+                value={mouse.dpi}
+                onChange={(v: number) => dispatcher(changeDPI(v))}
+                step={10}
+                min={100}
+                max={8000}
+                size={10}
+              />
 
-              <Button
-                sx={(theme) => ({ backgroundColor: smartshift.on ? theme.colors.green : theme.colors.gray })}
-                onClick={() => dispatcher(toggleSS())}
-              >{smartshift.on ? "Smartshift On" : "Smartshift Off"}</Button>
+              <Toggleswitch
+                props={{
+                  label: "Smartshift",
+                  checked: smartshift.on,
+                  dispatcher: toggleSS
+                }}
+              />
+            </Accordion.Panel>
+          </Accordion.Item>
 
-            </Group>
 
-            <Stack className="section">
-              <Center>
-                <Text fz="xl" fw={700}>Hiresscroll</Text>
-              </Center>
-              <Group>
-                <Button
-                  sx={(theme) => ({ backgroundColor: hiresscroll.hires ? theme.colors.green : theme.colors.gray })}
-                  onClick={() => dispatcher(toggleHiresscroll())}
-                >{hiresscroll.hires ? "On" : "Off"}</Button>
+          <Accordion.Item value="scroll" className="section">
+            <Accordion.Control>Scrollbehaviour</Accordion.Control>
+            <Accordion.Panel>
+              <Toggleswitch
+                props={{
+                  label: "Hiresscroll",
+                  checked: hiresscroll.hires,
+                  dispatcher: toggleHiresscroll
+                }}
+              />
+              <Toggleswitch
+                props={{
+                  label: "Inverted",
+                  checked: hiresscroll.invert,
+                  dispatcher: invertHiresscroll
+                }}
+              />
+              <Toggleswitch
+                props={{
+                  label: "Target",
+                  checked: hiresscroll.target,
+                  dispatcher: targetHiresscroll
+                }}
+              />
+            </Accordion.Panel>
+          </Accordion.Item>
 
-                <Button
-                  sx={(theme) => ({ backgroundColor: hiresscroll.invert ? theme.colors.green : theme.colors.gray })}
-                  onClick={() => dispatcher(invertHiresscroll)}
-                >{hiresscroll.invert ? "Inverted" : "Not inverted"}</Button>
-
-                <Button
-                  sx={(theme) => ({ backgroundColor: hiresscroll.target ? theme.colors.green : theme.colors.gray })}
-                  onClick={() => dispatcher(targetHiresscroll())}
-                >{hiresscroll.target ? "Target" : "No target"}</Button>
-              </Group>
-            </Stack>
-
-            <Stack className="section">
-              <Center>
-                <Text fz="xl" fw={700}>Thumbwheel</Text>
-              </Center>
+          <Accordion.Item value="thumbwheel" className="section">
+            <Accordion.Control>Thumbwheel</Accordion.Control>
+            <Accordion.Panel>
               <Center>
                 <Group>
-                  <Button
-                    sx={(theme) => ({ backgroundColor: thumbwheel.divert ? theme.colors.green : theme.colors.gray })}
-                    onClick={() => dispatcher(TWDivert())} >
-                    {thumbwheel.divert ? "Divert" : "No Divert"}
-                  </Button>
-                  <Button
-                    sx={(theme) => ({ backgroundColor: thumbwheel.invert ? theme.colors.green : theme.colors.gray })}
-                    onClick={() => dispatcher(TWInvert())} >
-                    {thumbwheel.invert ? "Inverted" : "Not inverted"}</Button>
+                  <Keybind
+                    props={{
+                      label: "Left",
+                      mode: thumbwheelLeft.mode,
+                      modeDispatcher: TWLeftMode,
+                      keys: thumbwheelLeft.keys,
+                      keyDispatcher: TWLeftActionKey
+                    }}
+                  />
+
+                  <Keybind
+                    props={{
+                      label: "Tap",
+                      mode: thumbwheelTap.type,
+                      modeDispatcher: TWTapctionType,
+                      keys: thumbwheelTap.keys,
+                      keyDispatcher: TWTapActionKey
+                    }}
+                  />
+
+                  <Keybind
+                    props={{
+                      label: "Right",
+                      mode: thumbwheelRight.mode,
+                      modeDispatcher: TWRightMode,
+                      keys: thumbwheelRight.keys,
+                      keyDispatcher: TWRightActionKey
+                    }}
+                  />
+
                 </Group>
               </Center>
 
+              <Toggleswitch
+                props={{
+                  label: "Divert",
+                  checked: thumbwheel.divert,
+                  dispatcher: TWDivert
+                }}
+              />
 
+              <Toggleswitch
+                props={{
+                  label: "Invert",
+                  checked: thumbwheel.invert,
+                  dispatcher: TWInvert
+                }}
+              />
+            </Accordion.Panel>
+          </Accordion.Item>
+
+          <Accordion.Item value="gestures" className="section">
+            <Accordion.Control>Gestures</Accordion.Control>
+            <Accordion.Panel>
               <Center>
-                <Group>
+                <Group spacing="xl">
                   <Stack>
-                    <Text>Left</Text>
-                    <Select
-                      data={[
-                        { value: "NoPress", label: "NoPress" },
-                        { value: "OnRelease", label: "OnRelease" },
-                        { value: "OnInterval", label: "OnInterval" },
-                        { value: "OnThreshold", label: "OnThreshold" }
-                      ]}
-                      label="Mode"
-                      value={thumbwheelLeft.mode}
-                      onChange={(v) => dispatcher(TWLeftMode(v ? v : "OnRelease"))}
+                    <Keybind
+                      props={{
+                        label: "Up",
+                        mode: gestureButtonUp.mode,
+                        modeDispatcher: GUpMode,
+                        keys: gestureButtonUp.keys,
+                        keyDispatcher: GUpActionKey
+                      }}
                     />
 
-                    <TextInput
-                      value={thumbwheelLeft.keys}
-                      label="Key"
-                      onChange={(v: BaseSyntheticEvent) => dispatcher(TWLeftActionKey(v.target.value))}
+                    <Keybind
+                      props={{
+                        label: "Down",
+                        mode: gestureButtonDown.mode,
+                        modeDispatcher: GDownMode,
+                        keys: gestureButtonDown.keys,
+                        keyDispatcher: GDownActionKey
+                      }}
                     />
-
-
                   </Stack>
-
                   <Stack>
-                    <Text>Right</Text>
-                    <Select
-                      data={[
-                        { value: "NoPress", label: "NoPress" },
-                        { value: "OnRelease", label: "OnRelease" },
-                        { value: "OnInterval", label: "OnInterval" },
-                        { value: "OnThreshold", label: "OnThreshold" }
-                      ]}
-                      label="Mode"
-                      value={thumbwheelRight.mode}
-                      onChange={(v) => dispatcher(TWRightMode(v ? v : "OnRelease"))}
+                    <Keybind
+                      props={{
+                        label: "Left",
+                        mode: gestureButtonLeft.mode,
+                        modeDispatcher: GLeftMode,
+                        keys: gestureButtonLeft.keys,
+                        keyDispatcher: GLeftActionKey
+                      }}
                     />
 
-                    <TextInput
-                      value={thumbwheelRight.keys}
-                      label="Key"
-                      onChange={(v) => dispatcher(TWRightActionKey(v.target.value))}
+                    <Keybind
+                      props={{
+                        label: "Right",
+                        mode: gestureButtonRight.mode,
+                        modeDispatcher: GRightMode,
+                        keys: gestureButtonRight.keys,
+                        keyDispatcher: GRightActionKey
+                      }}
                     />
-
-                  </Stack>
-
-                  <Stack>
-                    <Text>Tap</Text>
-                    <Select
-                      data={[
-                        { value: "Keypress", label: "Keypress" },
-                        { value: "ToggleSmartshift", label: "ToggleSmartshift" },
-                        { value: "ToggleHiresScroll", label: "ToggleHiresScroll" },
-                        { value: "Gestures", label: "Gestures" },
-                        { value: "CycleDPI", label: "CycleDPI" },
-                        { value: "ChangeDPI", label: "ChangeDPI" },
-                      ]}
-                      label="Mode"
-                      value={thumbwheelTap.type}
-                      onChange={(v) => dispatcher(TWTapctionType(v ? v : "OnRelease"))}
-                    />
-
-                    <TextInput
-                      value={thumbwheelTap.keys![0]}
-                      label="Key"
-                      onChange={(v) => dispatcher(TWTapActionKey(v.target.value))}
-                    />
-
                   </Stack>
                 </Group>
               </Center>
-            </Stack>
+            </Accordion.Panel>
+          </Accordion.Item>
 
-            <Stack className="section">
+          <Accordion.Item value="buttons" className="section">
+            <Accordion.Control>Buttons</Accordion.Control>
+            <Accordion.Panel>
               <Center>
-                <Text fz="xl" fw={700}>Gestures</Text>
+                <Group>
+                  <Keybind
+                    props={{
+                      label: "Forward Button",
+                      mode: forwardButton.type,
+                      modeDispatcher: ForwardBtnActionType,
+                      keys: forwardButton.keys,
+                      keyDispatcher: ForwardBtnActionKey
+                    }}
+                  />
+
+                  <Keybind
+                    props={{
+                      label: "Center Button",
+                      mode: centerButton.type,
+                      modeDispatcher: CenterBtnActionType,
+                      keys: centerButton.keys,
+                      keyDispatcher: CenterBtnActionKey
+                    }}
+                  />
+
+                  <Keybind
+                    props={{
+                      label: "back Button",
+                      mode: backButton.type,
+                      modeDispatcher: BackBtnActionType,
+                      keys: backButton.keys,
+                      keyDispatcher: BackBtnActionKey
+                    }}
+                  />
+
+                </Group>
               </Center>
-              <Group>
-                <Stack>
-                  <Text>Up</Text>
-                  <Select
-                    data={[
-                      { value: "NoPress", label: "NoPress" },
-                      { value: "OnRelease", label: "OnRelease" },
-                      { value: "OnInterval", label: "OnInterval" },
-                      { value: "OnThreshold", label: "OnThreshold" }
-                    ]}
-                    label="Mode"
-                    value={gestureButtonUp.mode}
-                    onChange={(v) => dispatcher(GUpMode(v ? v : "OnRelease"))}
-                  />
-                  <TextInput
-                    value={gestureButtonUp.keys![0]}
-                    label="Key"
-                    onChange={(v: BaseSyntheticEvent) => dispatcher(GUpActionKey(v.target.value))}
-                  />
-                </Stack>
+            </Accordion.Panel>
+          </Accordion.Item>
 
-                <Stack>
-                  <Text>Down</Text>
-                  <Select
-                    data={[
-                      { value: "NoPress", label: "NoPress" },
-                      { value: "OnRelease", label: "OnRelease" },
-                      { value: "OnInterval", label: "OnInterval" },
-                      { value: "OnThreshold", label: "OnThreshold" }
-                    ]}
-                    label="Mode"
-                    value={gestureButtonDown.mode}
-                    onChange={(v) => dispatcher(GDownMode(v ? v : "OnRelease"))}
-                  />
-                  <TextInput
-                    value={gestureButtonDown.keys![0]}
-                    label="Key"
-                    onChange={(v: BaseSyntheticEvent) => dispatcher(GDownActionKey(v.target.value))}
-                  />
-                </Stack>
+          <Button type="submit" sx={(theme) => ({
+            position: "absolute",
+            right: "1rem",
+            bottom: "1rem",
+            background: theme.colors.green
+          })}>Save</Button>
+          {
+            message &&
+            <>
+              <Modal opened={(message !== "")} onClose={() => setMessage("")} title="Authentication">
+                <List>
+                  <List.Item>
+                    <Text>Please run:{message}
+                      <Clipboard
+                        style={{ margin: "auto 0", cursor: "pointer" }}
+                        onClick={() => {
+                          clipboard.writeText(message)
+                        }}
+                      />
 
-                <Stack>
-                  <Text>Left</Text>
-                  <Select
-                    data={[
-                      { value: "NoPress", label: "NoPress" },
-                      { value: "OnRelease", label: "OnRelease" },
-                      { value: "OnInterval", label: "OnInterval" },
-                      { value: "OnThreshold", label: "OnThreshold" }
-                    ]}
-                    label="Mode"
-                    value={gestureButtonLeft.mode}
-                    onChange={(v) => dispatcher(GLeftMode(v ? v : "OnRelease"))}
-                  />
-                  <TextInput
-                    value={gestureButtonLeft.keys![0]}
-                    label="Key"
-                    onChange={(v: BaseSyntheticEvent) => dispatcher(GLeftActionKey(v.target.value))}
-                  />
-                </Stack>
-
-                <Stack>
-                  <Text>Right</Text>
-                  <Select
-                    data={[
-                      { value: "NoPress", label: "NoPress" },
-                      { value: "OnRelease", label: "OnRelease" },
-                      { value: "OnInterval", label: "OnInterval" },
-                      { value: "OnThreshold", label: "OnThreshold" }
-                    ]}
-                    label="Mode"
-                    value={gestureButtonRight.mode}
-                    onChange={(v) => dispatcher(GRightMode(v ? v : "OnRelease"))}
-                  />
-                  <TextInput
-                    value={gestureButtonRight.keys![0]}
-                    label="Key"
-                    onChange={(v: BaseSyntheticEvent) => dispatcher(GRightActionKey(v.target.value))}
-                  />
-                </Stack>
-              </Group>
-            </Stack>
-
-            <Stack className="section">
-              <Center>
-                <Text fz="xl" fw={700}>Buttons</Text>
-              </Center>
-              <Group>
-                <Stack>
-                  <Text>Forward Button Button</Text>
-                  <Select
-                    data={[
-                      { value: "Keypress", label: "Keypress" },
-                      { value: "ToggleSmartshift", label: "ToggleSmartshift" },
-                      { value: "ToggleHiresScroll", label: "ToggleHiresScroll" },
-                      { value: "Gestures", label: "Gestures" },
-                      { value: "CycleDPI", label: "CycleDPI" },
-                      { value: "ChangeDPI", label: "ChangeDPI" },
-                    ]}
-                    label="Mode"
-                    value={forwardButton.type!}
-                    onChange={(v) => dispatcher(ForwardBtnActionType(v ? v : "KeyPress"))}
-                  />
-
-                  {(forwardButton.type === "Keypress") &&
-                    <TextInput
-                      value={forwardButton.keys![0]}
-                      label="Key"
-                      onChange={(v: BaseSyntheticEvent) => dispatcher(ForwardBtnActionKey(v.target.value))}
-                    />
-                  }
-
-                </Stack>
-
-                <Stack>
-                  <Text>Center Button Button</Text>
-                  <Select
-                    data={[
-                      { value: "Keypress", label: "Keypress" },
-                      { value: "ToggleSmartshift", label: "ToggleSmartshift" },
-                      { value: "ToggleHiresScroll", label: "ToggleHiresScroll" },
-                      { value: "Gestures", label: "Gestures" },
-                      { value: "CycleDPI", label: "CycleDPI" },
-                      { value: "ChangeDPI", label: "ChangeDPI" },
-                    ]}
-                    label="Mode"
-                    value={centerButton.type!}
-                    onChange={(v) => dispatcher(CenterBtnActionType(v ? v : "KeyPress"))}
-                  />
-                  {(centerButton.type === "Keypress") &&
-                    <TextInput
-                      value={centerButton.keys![0]}
-                      label="Key"
-                      onChange={(v: BaseSyntheticEvent) => dispatcher(CenterBtnActionKey(v.target.value))}
-                    />
-                  }
-
-                </Stack>
-
-                <Stack>
-                  <Text>Back Button Button</Text>
-                  <Select
-                    data={[
-                      { value: "Keypress", label: "Keypress" },
-                      { value: "ToggleSmartshift", label: "ToggleSmartshift" },
-                      { value: "ToggleHiresScroll", label: "ToggleHiresScroll" },
-                      { value: "Gestures", label: "Gestures" },
-                      { value: "CycleDPI", label: "CycleDPI" },
-                      { value: "ChangeDPI", label: "ChangeDPI" },
-                    ]}
-                    label="Mode"
-                    value={backButton.type!}
-                    onChange={(v) => dispatcher(BackBtnActionType(v ? v : "KeyPress"))}
-                  />
-
-                  {(backButton.type === "Keypress") &&
-                    <TextInput
-                      value={backButton.keys![0]}
-                      label="Key"
-                      onChange={(v: BaseSyntheticEvent) => dispatcher(BackBtnActionKey(v.target.value))}
-                    />
-                  }
-
-                </Stack>
-              </Group>
-            </Stack>
-
-            <Center>
-              <Button type="submit" sx={(theme) => ({ background: theme.colors.green })}>Save</Button>
-            </Center>
-            {
-              message &&
-              <>
-                <Modal opened={(message !== "")} onClose={() => setMessage("")} title="Authentication">
-                  <List>
-                    <List.Item>
-                      <Text>Please run:{message}
-                        <Clipboard
-                          style={{ margin: "auto 0" }}
-                          onClick={() => {
-                            clipboard.writeText(message)
-                          }}
-                        />
-
-                      </Text>
-                    </List.Item>
-                    <List.Item>
-                      <Text>If you haven't already start the daemon for logid then you can move the cfg file to /etc/config.cfg</Text>
-                    </List.Item>
-                  </List>
-                </Modal>
-              </>
-            }
-          </form>
-        </Center>
+                    </Text>
+                  </List.Item>
+                  <List.Item>
+                    <Text>If you haven't already start the daemon for logid then you can move the cfg file to /etc/config.cfg</Text>
+                  </List.Item>
+                </List>
+              </Modal>
+            </>
+          }
+        </form>
 
 
         {
-          showKeys &&
-          keys.map((k: Object, v: any) => {
-            const key = Object.entries(k)
+          sections.keys &&
+          keys.map((v: Object, k: number) => {
+            const key = Object.entries(v)
 
             return (
-              <p key={v}>
+              <p key={k}>
                 {key[0][0]}: {key[0][1]}
               </p>
             )
           })
         }
-      </>
-    </div >
+      </Accordion>
+    </>
   )
 }

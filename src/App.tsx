@@ -15,6 +15,36 @@ function App() {
         <MantineProvider theme={{
           colorScheme: "dark",
           components: {
+            Accordion: {
+              styles: () => ({
+                root: {
+                  background: "red",
+                  width: "100%"
+                },
+                control: {
+                  width: "100%"
+                },
+                item: {
+                  width: "100%",
+                },
+                panel: {
+                  width: "100%",
+                }
+              })
+            },
+
+            Switch: {
+              styles: () => ({
+                root: {
+                  margin: ".5rem",
+                  width: "100%"
+                },
+                body: {
+                  justifyContent: "space-between"
+                }
+              })
+            },
+
             Button: {
               styles: () => ({
                 root: {
@@ -32,13 +62,13 @@ function App() {
             "nord_gray": ["#43474F", "#3C404A", "#353A44", "#2E3440", "#2B2F38", "#282B31", "#25272B", "#222327", "#1F2022", "#1C1D1E"],
             "nord_success": ["#548F54", "#458945", "#378437", "#2A812A", "#1C7F1C", "#0E7F0E", "#008000", "#0C680C", "#135513", "#174717",]
           },
-          primaryColor: "nord_gray",
+          primaryColor: "nord_success",
         }} withGlobalStyles withNormalizeCSS>
           <Navigation />
           <MouseSettings />
         </MantineProvider>
       </Provider>
-    </main>
+    </main >
   )
 }
 

@@ -38,5 +38,9 @@ body{
   background-color: rgba(0,0,0,0.5);
   padding: 1rem;
   border-radius: $border-radius;
-  text-align: center;
+  transition-duration: 1s;
+  width: 100%;
+  &-inner{
+    @include flex(column, center, center);
+  }
 }
