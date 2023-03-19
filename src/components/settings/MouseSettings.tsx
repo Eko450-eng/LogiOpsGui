@@ -1,9 +1,9 @@
 import fs from 'fs'
 import os from 'os'
 import { BaseSyntheticEvent, useState } from "react";
-import { Clipboard, X } from 'tabler-icons-react'
+import { Clipboard } from 'tabler-icons-react'
 import { keys } from "./defaults/KeyCodes";
-import { Text, TextInput, Group, Button, NumberInput, Center, Stack, Modal, List, Accordion, Affix, Slider } from '@mantine/core'
+import { Text, TextInput, Group, Button, NumberInput, Center, Stack, Modal, List, Accordion, Slider } from '@mantine/core'
 import { useDispatch, useSelector } from 'react-redux'
 import { templateConfig } from "./defaults/config";
 import { RootState } from "@/interfaces/redux/mouseSettingsStore";
@@ -27,15 +27,6 @@ import Toggleswitch from './components/Toggleswitch';
 
 export default function MouseSettings() {
   const homeDir = os.homedir()
-  const [sections, showSection] = useState({
-    keys: false,
-    settings: false,
-    device: false,
-    hires: false,
-    thumbwheel: false,
-    gestures: false,
-    buttons: false,
-  })
   const [message, setMessage] = useState("")
   const mouse = useSelector((state: RootState) => state.mouse)
   const smartshift = useSelector((state: RootState) => state.smartshift)
@@ -336,18 +327,22 @@ export default function MouseSettings() {
         </form>
 
 
-        {
-          sections.keys &&
-          keys.map((v: Object, k: number) => {
-            const key = Object.entries(v)
+        <Accordion.Item value="Keys">
+          <Accordion.Control>Keyevents Linux</Accordion.Control>
+          <Accordion.Panel>
+            {
+              keys.map((v: Object, k: number) => {
+                const key = Object.entries(v)
 
-            return (
-              <p key={k}>
-                {key[0][0]}: {key[0][1]}
-              </p>
-            )
-          })
-        }
+                return (
+                  <p key={k}>
+                    {key[0][0]}: {key[0][1]}
+                  </p>
+                )
+              })
+            }
+          </Accordion.Panel>
+        </Accordion.Item>
       </Accordion>
     </>
   )

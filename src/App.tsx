@@ -5,8 +5,6 @@ import Navigation from './components/navigation/Navigation'
 import MouseSettings from './components/settings/MouseSettings'
 import { store } from './interfaces/redux/mouseSettingsStore'
 
-console.log('[App.tsx]', `Hello world from Electron ${process.versions.electron}!`)
-
 function App() {
 
   return (

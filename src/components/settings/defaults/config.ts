@@ -1,6 +1,7 @@
 import { IButton, IGesture, IHiresScroll, IMouse, ISmartShift, IThumbwheel, IThumbwheelActions } from "@/interfaces/KeyTypes"
 
-export const templateConfig = (mouse: IMouse,
+export const templateConfig = (
+  mouse: IMouse,
   smartshift: ISmartShift,
   hiresscroll: IHiresScroll,
   thumbwheel: IThumbwheel,

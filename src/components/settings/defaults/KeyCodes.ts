@@ -1,5 +1,3 @@
-import { IKey } from "@/interfaces/Keys";
-
 export const keys = [
   { "KEY_RESERVED": 0 },
   { "KEY_ESC": 1 },
